@@ -1,0 +1,268 @@
+@import "tailwindcss";
+
+/*
+ * Markdown files under public/design-system/ aren't in Vite's module graph,
+ * so Tailwind's auto-detection misses class names used inside their `tsx
+ * preview` blocks. @source adds them to the scanner explicitly.
+ */
+@source "../public/design-system/**/*.md";
+
+/* =====================================================================
+ * miku-amp — Design Tokens (single preset, M500 Miku-derived)
+ *
+ * Two-accent model:
+ *   accent     — interaction layer (cyan). Focus rings, primary buttons,
+ *                links, slider thumbs, active nav-tabs.
+ *   highlight  — state layer (pink). Currently-playing row, music-note
+ *                glyph, mini-player progress fill, "active" markers.
+ *
+ * Theme-preset switching is a future addition; for now `:root` is the
+ * single preset.
+ * =================================================================== */
+
+@theme {
+  /* Brand fixed colours — the two hues that make the app read as Miku. */
+  --color-miku-cyan: #39c5bd;
+  --color-miku-pink: #ea547a;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+
+/*
+ * Semantic tokens use `@theme inline` so utilities reference the runtime
+ * CSS variables directly (e.g. `bg-accent` → `var(--accent)`). Plain
+ * `@theme` would compute the var at :root and freeze the value, breaking
+ * any future per-album-art override that writes to --accent on a wrapper.
+ */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+
+  /* Interaction accent (cyan). Hover/active darken toward --accent-fg so
+     they self-adjust if the accent ever swaps to a lighter or darker hue. */
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: color-mix(in oklab, var(--accent) 18%, transparent);
+  --color-accent-hover: color-mix(in oklab, var(--accent), var(--accent-fg) 10%);
+  --color-accent-active: color-mix(in oklab, var(--accent), var(--accent-fg) 20%);
+
+  /* State highlight (pink). One soft tint is enough — highlight is a flat
+     state marker, not an interactive surface, so no hover/active shades. */
+  --color-highlight: var(--highlight);
+  --color-highlight-fg: var(--highlight-fg);
+  --color-highlight-soft: color-mix(in oklab, var(--highlight) 14%, transparent);
+}
+
+@layer base {
+  :root {
+    /* Surfaces — cool-toned dark, OLED-friendly on the M500. The slight
+       teal undertone keeps cyan accents from floating on neutral grey. */
+    --bg: #0a0d0f;
+    --surface: #15191c;
+    --border: #1f262a;
+
+    --fg: #e8eef0;
+    --fg-muted: #7d8a90;
+    --fg-subtle: #4d575c;
+
+    --accent: var(--color-miku-cyan);
+    --accent-fg: #0a0d0f;
+
+    --highlight: var(--color-miku-pink);
+    --highlight-fg: #0a0d0f;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-feature-settings: "liga", "kern";
+    -webkit-font-smoothing: antialiased;
+    @apply scroll-style;
+  }
+}
+
+/* =====================================================================
+ * Typography utilities — drop on any element. Colour stays separate
+ * (use `text-fg`, `text-fg-muted`, `text-accent`, `text-highlight`).
+ * Display headings clamp() between phone and DAP-portrait widths.
+ * =================================================================== */
+
+@utility text-style-display {
+  font-family: var(--font-sans);
+  font-size: clamp(1.875rem, 5vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+@utility text-style-heading-1 {
+  font-family: var(--font-sans);
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+@utility text-style-heading-2 {
+  font-family: var(--font-sans);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+@utility text-style-heading-3 {
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+@utility text-style-section-title {
+  font-family: var(--font-sans);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+@utility text-style-body {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+@utility text-style-lead {
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+}
+
+@utility text-style-track-title {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+}
+
+@utility text-style-track-meta {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+@utility text-style-caption {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+@utility text-style-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Tabular monospaced digits for elapsed/remaining time so the readout
+   doesn't jiggle as the track plays. */
+@utility text-style-time {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+/* =====================================================================
+ * Scrollbar styling — apply to anything that scrolls so native scrollbars
+ * pick up the design tokens. Targets WebKit (Chrome / Safari / Edge,
+ * including Android) and Firefox; Android Chrome already auto-hides
+ * scrollbars by default, so mobile users see nothing distracting either way.
+ *
+ * Body inherits this via @apply in @layer base; nested overflow containers
+ * (code blocks, drawers, scroll-locked main regions) opt in by adding
+ * `scroll-style` themselves.
+ * =================================================================== */
+
+@utility scroll-style {
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+
+  /* WebKit */
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 9999px;
+    transition: background-color 150ms ease-out;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: var(--fg-muted);
+  }
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+/* =====================================================================
+ * Progress indeterminate animation — sweeps a third-width pill from
+ * off-screen left to off-screen right. Used by `<Progress value={null} />`
+ * via the `animate-progress-indeterminate` utility.
+ * =================================================================== */
+
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+@utility animate-progress-indeterminate {
+  animation: progress-indeterminate 1.6s ease-in-out infinite;
+}
+
+/* =====================================================================
+ * Skeleton shimmer — slides a 200%-wide horizontal gradient from right to
+ * left to suggest light glancing across an unloaded surface. Pair with a
+ * `bg-gradient-to-r` background and `bg-[length:200%_100%]` so the gradient
+ * has room to travel.
+ * =================================================================== */
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@utility animate-skeleton-shimmer {
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
