@@ -1,5 +1,6 @@
 ```scope
 FullPlayer
+asset
 ```
 
 # Full Player
@@ -18,7 +19,7 @@ The fullscreen now-playing surface. Hero-cover layout tuned for the M500's portr
         title="World Is Mine"
         artist="supercell feat. Hatsune Miku"
         album="World Is Mine"
-        coverUrl="/wallpaper.png"
+        coverUrl={asset("wallpaper.png")}
         playing={playing}
         progressSec={progressSec}
         durationSec={248}
@@ -57,7 +58,7 @@ The intended target: 360 × 640 portrait. Cover sits ~280 px square; title/artis
         title="Tell Your World"
         artist="livetune feat. Hatsune Miku"
         album="Re:Dial"
-        coverUrl="/wallpaper.png"
+        coverUrl={asset("wallpaper.png")}
         playing={playing}
         progressSec={progressSec}
         durationSec={265}
@@ -91,7 +92,7 @@ The preview below pins the FullPlayer at 52 rem and lets the doc frame scroll ho
           title="Tell Your World"
           artist="livetune feat. Hatsune Miku"
           album="Re:Dial"
-          coverUrl="/wallpaper.png"
+          coverUrl={asset("wallpaper.png")}
           playing={playing}
           progressSec={progressSec}
           durationSec={265}
@@ -123,7 +124,7 @@ Active shuffle / repeat read as `text-accent` (cyan) on the trailing icons; off-
         title="Romeo and Cinderella"
         artist="doriko feat. Hatsune Miku"
         album="kiss"
-        coverUrl="/wallpaper.png"
+        coverUrl={asset("wallpaper.png")}
         playing
         progressSec={210}
         durationSec={325}

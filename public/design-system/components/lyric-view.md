@@ -3,6 +3,7 @@ LyricView
 IconButton
 PlayIcon
 PauseIcon
+asset
 ```
 
 # Lyric View
@@ -38,7 +39,7 @@ Track context on top, lyrics underneath. Two lyric formats: a plain text block, 
           title="Tell Your World"
           artist="livetune"
           album="Re:Dial"
-          coverUrl="/wallpaper.png"
+          coverUrl={asset("wallpaper.png")}
           duration="4:25"
           format="FLAC"
           bitrate="3072 kbps"
@@ -99,7 +100,7 @@ Pass `LyricLine[]` and a `currentTimeSec` — the view marks the line whose time
           title="Romeo and Cinderella"
           artist="doriko"
           album="kiss"
-          coverUrl="/wallpaper.png"
+          coverUrl={asset("wallpaper.png")}
           duration="5:25"
           format="MP3"
           bitrate="320 kbps"
@@ -153,7 +154,7 @@ Drop `onSeek` and the lines render as plain text — still timed, still highligh
           title="World Is Mine"
           artist="supercell"
           album="World Is Mine"
-          coverUrl="/wallpaper.png"
+          coverUrl={asset("wallpaper.png")}
           duration="4:08"
           format="FLAC"
           bitDepth="16-bit"
@@ -199,7 +200,7 @@ Hisameku no wa anata no koe`;
       <LyricView
         title="Senbonzakura"
         artist="Kurousa-P"
-        coverUrl="/wallpaper.png"
+        coverUrl={asset("wallpaper.png")}
         duration="3:48"
         format="MP3"
         bitrate="256 kbps"

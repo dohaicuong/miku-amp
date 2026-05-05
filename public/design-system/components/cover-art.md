@@ -1,5 +1,6 @@
 ```scope
 CoverArt
+asset
 ```
 
 # Cover Art
@@ -7,7 +8,7 @@ CoverArt
 The image surface every album/track/artist tile + row in the app uses. Renders an `<img>` when a `src` is provided, falls back to a music-note placeholder on `bg-surface` when it isn't. Sizing is the caller's responsibility — pass dimensions via `className`.
 
 ```tsx preview
-<CoverArt src="/wallpaper.png" alt="World Is Mine — supercell" className="aspect-square w-40" />
+<CoverArt src={asset("wallpaper.png")} alt="World Is Mine — supercell" className="aspect-square w-40" />
 ```
 
 ## Examples
@@ -18,9 +19,9 @@ The standard surface — `<img>` lazy-loaded, `object-cover` to fill any aspect 
 
 ```tsx preview
 <div className="flex flex-wrap items-end gap-4">
-  <CoverArt src="/wallpaper.png" alt="World Is Mine" className="aspect-square w-32" />
-  <CoverArt src="/wallpaper.png" alt="World Is Mine" className="aspect-square w-20" />
-  <CoverArt src="/wallpaper.png" alt="World Is Mine" className="aspect-square w-12" />
+  <CoverArt src={asset("wallpaper.png")} alt="World Is Mine" className="aspect-square w-32" />
+  <CoverArt src={asset("wallpaper.png")} alt="World Is Mine" className="aspect-square w-20" />
+  <CoverArt src={asset("wallpaper.png")} alt="World Is Mine" className="aspect-square w-12" />
 </div>
 ```
 
@@ -44,19 +45,19 @@ No `src` → music-note placeholder on `bg-surface`. Same dimensions; the surfac
 <div className="flex flex-wrap items-end gap-4">
   <CoverArt
     alt="Album"
-    src="/wallpaper.png"
+    src={asset("wallpaper.png")}
     className="aspect-square w-24"
     rounded="rounded-md"
   />
   <CoverArt
     alt="Track thumb"
-    src="/wallpaper.png"
+    src={asset("wallpaper.png")}
     className="aspect-square w-12"
     rounded="rounded-sm"
   />
   <CoverArt
     alt="Artist"
-    src="/wallpaper.png"
+    src={asset("wallpaper.png")}
     className="aspect-square w-24"
     rounded="rounded-full"
   />

@@ -1,5 +1,6 @@
 ```scope
 TrackRow
+asset
 ```
 
 # Track Row
@@ -16,7 +17,7 @@ Compact horizontal list-row for the library track lists, queue, and search resul
     format="FLAC"
     bitrate="1411 kbps"
     bitDepth="16-bit"
-    coverUrl="/wallpaper.png"
+    coverUrl={asset("wallpaper.png")}
   />
   <TrackRow
     title="Tell Your World"

@@ -1,5 +1,6 @@
 ```scope
 ArtistCard
+asset
 ```
 
 # Artist Card
@@ -11,7 +12,7 @@ Circular-avatar tile for the artist grid. Same vertical-stack rhythm as `AlbumCa
   <ArtistCard
     name="supercell"
     subtitle="6 albums"
-    imageUrl="/wallpaper.png"
+    imageUrl={asset("wallpaper.png")}
   />
   <ArtistCard name="livetune" subtitle="3 albums" />
   <ArtistCard name="doriko" subtitle="9 tracks" />

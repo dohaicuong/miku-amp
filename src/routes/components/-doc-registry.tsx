@@ -53,6 +53,7 @@ import { FullPlayer } from "@/components/features/full-player";
 import { LyricView } from "@/components/features/lyric-view";
 import { MiniPlayer } from "@/components/features/mini-player";
 import { TrackRow } from "@/components/features/track-row";
+import { asset } from "@/lib/asset";
 import type { DocScope } from "@/components/docs/component-doc";
 
 export const docPool: DocScope = {
@@ -84,6 +85,8 @@ export const docPool: DocScope = {
   TrackRow,
   // Hooks
   useToast,
+  // Helpers
+  asset,
   // Phosphor icons used by previews
   BookmarkSimpleIcon,
   CaretRightIcon,
