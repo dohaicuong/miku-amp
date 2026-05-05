@@ -97,11 +97,7 @@ The icon size scales with the button (16 / 20 / 24 px), so the same `<PlayIcon /
 Like `Button`, `IconButton` accepts a `render` prop to project icon-button semantics onto a router `<Link>` or any focusable element. Space-key activation is patched to match `<button>` semantics on non-native renders (inherited from the underlying Base UI `Button`).
 
 ```tsx preview
-<IconButton
-  variant="ghost"
-  aria-label="Continue reading"
-  render={<a href="#continue" />}
->
+<IconButton variant="ghost" aria-label="Continue reading" render={<a href="#continue" />}>
   <CaretRightIcon weight="light" />
 </IconButton>
 ```

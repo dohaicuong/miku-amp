@@ -8,7 +8,11 @@ asset
 The image surface every album/track/artist tile + row in the app uses. Renders an `<img>` when a `src` is provided, falls back to a music-note placeholder on `bg-surface` when it isn't. Sizing is the caller's responsibility — pass dimensions via `className`.
 
 ```tsx preview
-<CoverArt src={asset("wallpaper.png")} alt="World Is Mine — supercell" className="aspect-square w-40" />
+<CoverArt
+  src={asset("wallpaper.png")}
+  alt="World Is Mine — supercell"
+  className="aspect-square w-40"
+/>
 ```
 
 ## Examples

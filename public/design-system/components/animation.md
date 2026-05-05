@@ -19,9 +19,7 @@ Sweeps a third-width pill from off-screen left (`-100%`) to off-screen right (`4
 Slides a 200 %-wide horizontal gradient from right to left to suggest light glancing across an unloaded surface. Pair with a `bg-gradient-to-r` background and `bg-[length:200%_100%]` so the gradient has room to travel. Used by `Skeleton` — track-row placeholders during library scan, cover-art placeholders while images decode.
 
 ```tsx preview
-<div
-  className="h-4 w-full max-w-md rounded-sm bg-gradient-to-r from-border via-surface to-border bg-[length:200%_100%] animate-skeleton-shimmer"
-/>
+<div className="h-4 w-full max-w-md rounded-sm bg-gradient-to-r from-border via-surface to-border bg-[length:200%_100%] animate-skeleton-shimmer" />
 ```
 
 ### spin (Tailwind built-in)
@@ -50,10 +48,10 @@ Easing:
 
 Reading a track list, tapping play, scrubbing the timeline — these are the primary use, and animation in any of them is friction. Keep these surfaces still:
 
-- **Track list rows** — selection + playing-state change *colour* via `transition-colors duration-150`, never *position*. Don't reorder with motion.
+- **Track list rows** — selection + playing-state change _colour_ via `transition-colors duration-150`, never _position_. Don't reorder with motion.
 - **Mini-player ↔ now-playing** — the only reasonable transition between them is a slide / scale (200 ms), but during a scrub or play/pause the surfaces should not move.
 - **Scrubber thumb** — follows the cursor / finger 1:1 with no transition. Any easing on a scrubber feels like input lag.
 - **Volume slider** — same. No transition on the thumb position.
 - **Cover-art swap on track change** — instant. A crossfade reads as "the app is thinking" when actually the song already changed.
 
-Reserve motion for state transitions the user *initiated* (drawer open, settings sheet) and for genuinely indeterminate work (library scan, decoding). Reading a library and playing music are the boring path — they should feel like nothing.
+Reserve motion for state transitions the user _initiated_ (drawer open, settings sheet) and for genuinely indeterminate work (library scan, decoding). Reading a library and playing music are the boring path — they should feel like nothing.

@@ -15,8 +15,7 @@ Centered modal built on Base UI. Backdrop dims and blurs the page; the popup flo
     <Dialog.Popup>
       <Dialog.Title>Leave the queue?</Dialog.Title>
       <Dialog.Description>
-        Your current track will keep playing. You can return to the queue any time from the
-        sidebar.
+        Your current track will keep playing. You can return to the queue any time from the sidebar.
       </Dialog.Description>
       <div className="mt-6 flex justify-end gap-2">
         <Dialog.Close render={<Button variant="ghost">Cancel</Button>} />
@@ -65,8 +64,7 @@ The standard surface — a question, supporting copy, and a Cancel / confirm pai
     <Dialog.Popup>
       <Dialog.Title>Leave the queue?</Dialog.Title>
       <Dialog.Description>
-        Your current track will keep playing. You can return to the queue any time from the
-        sidebar.
+        Your current track will keep playing. You can return to the queue any time from the sidebar.
       </Dialog.Description>
       <div className="mt-6 flex justify-end gap-2">
         <Dialog.Close render={<Button variant="ghost">Cancel</Button>} />

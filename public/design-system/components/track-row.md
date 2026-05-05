@@ -94,7 +94,7 @@ Pass `playing` to mark the currently-playing track. Row fills with the pink `hig
 
 ### Tech specs available subset
 
-`duration`, `format`, `bitrate`, `bitDepth` are all independently optional. Whichever subset is provided joins with ` · `; if none are, the tech line disappears and the row falls back to the compact two-line layout.
+`duration`, `format`, `bitrate`, `bitDepth` are all independently optional. Whichever subset is provided joins with `·`; if none are, the tech line disappears and the row falls back to the compact two-line layout.
 
 ```tsx preview
 <div className="border border-border rounded-md w-full max-w-md overflow-hidden">

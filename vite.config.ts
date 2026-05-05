@@ -12,7 +12,11 @@ export default defineConfig({
   staged: {
     "*": "vp check --fix",
   },
-  lint: { options: { typeAware: true, typeCheck: true } },
+  fmt: { ignorePatterns: ["src/routeTree.gen.ts"] },
+  lint: {
+    ignorePatterns: ["src/routeTree.gen.ts"],
+    options: { typeAware: true, typeCheck: true },
+  },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

@@ -9,11 +9,7 @@ Circular-avatar tile for the artist grid. Same vertical-stack rhythm as `AlbumCa
 
 ```tsx preview
 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 w-full">
-  <ArtistCard
-    name="supercell"
-    subtitle="6 albums"
-    imageUrl={asset("wallpaper.png")}
-  />
+  <ArtistCard name="supercell" subtitle="6 albums" imageUrl={asset("wallpaper.png")} />
   <ArtistCard name="livetune" subtitle="3 albums" />
   <ArtistCard name="doriko" subtitle="9 tracks" />
   <ArtistCard name="cosMo @BousouP" subtitle="22 tracks" />
@@ -42,10 +38,7 @@ Name clamps to two lines, subtitle truncates to one. Keeps row height determinis
 
 ```tsx preview
 <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 w-full max-w-2xl">
-  <ArtistCard
-    name="A Very Long Composer Pseudonym That Will Wrap"
-    subtitle="2 albums"
-  />
+  <ArtistCard name="A Very Long Composer Pseudonym That Will Wrap" subtitle="2 albums" />
   <ArtistCard name="mothy / Akuno-P / 悪ノP" subtitle="40+ tracks across multiple aliases" />
 </div>
 ```

@@ -129,11 +129,7 @@ function TimedLyrics({
         const isActive = i === activeIndex;
         const isPast = i < activeIndex;
         const text = line.text || " "; // nbsp keeps blank lines visible
-        const tone = isActive
-          ? "text-fg font-medium"
-          : isPast
-            ? "text-fg-subtle"
-            : "text-fg-muted";
+        const tone = isActive ? "text-fg font-medium" : isPast ? "text-fg-subtle" : "text-fg-muted";
         return (
           <li key={i} ref={isActive ? activeRef : undefined}>
             {onSeek ? (
@@ -150,10 +146,7 @@ function TimedLyrics({
                 <span className={cn("text-style-lead transition-colors", tone)}>{text}</span>
               </BaseButton>
             ) : (
-              <div
-                aria-current={isActive ? "true" : undefined}
-                className="-mx-2 px-2 py-1"
-              >
+              <div aria-current={isActive ? "true" : undefined} className="-mx-2 px-2 py-1">
                 <span className={cn("text-style-lead transition-colors", tone)}>{text}</span>
               </div>
             )}

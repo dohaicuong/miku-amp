@@ -73,7 +73,10 @@ Compose the variants to suggest the final layout while content loads. Useful for
 ```tsx preview
 <div className="flex flex-col w-full max-w-md border border-border rounded-md overflow-hidden">
   {[0, 1, 2].map((i) => (
-    <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-border last:border-b-0">
+    <div
+      key={i}
+      className="flex items-center gap-3 px-4 py-3 border-b border-border last:border-b-0"
+    >
       <Skeleton variant="rect" className="h-10 w-10 shrink-0 rounded-sm" />
       <div className="flex-1 flex flex-col gap-2 min-w-0">
         <Skeleton variant="text" className="h-4 w-2/3" />

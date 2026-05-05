@@ -62,7 +62,7 @@ Track context on top, lyrics underneath. Two lyric formats: a plain text block, 
       </div>
     </div>
   );
-}
+};
 ```
 
 ## Examples
@@ -122,7 +122,7 @@ Pass `LyricLine[]` and a `currentTimeSec` — the view marks the line whose time
       </div>
     </div>
   );
-}
+};
 ```
 
 ### Read-only timed lyrics
@@ -175,7 +175,7 @@ Drop `onSeek` and the lines render as plain text — still timed, still highligh
       </div>
     </div>
   );
-}
+};
 ```
 
 ### Plain text
@@ -208,7 +208,7 @@ Hisameku no wa anata no koe`;
       />
     </div>
   );
-}
+};
 ```
 
 ### Empty state

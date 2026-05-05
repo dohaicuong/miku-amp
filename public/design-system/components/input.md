@@ -54,17 +54,19 @@ Heights are 36 / 44 / 48 px to match the Button primitive — `md` is the iOS/An
 Pass `value` and `onChange` to own state in the parent. Standard React-input semantics — nothing component-specific.
 
 ```tsx preview
-{() => {
-  const [v, setV] = useState("");
-  return (
-    <Input
-      value={v}
-      onChange={(e) => setV(e.target.value)}
-      placeholder="Type to control"
-      className="max-w-md"
-    />
-  );
-}}
+{
+  () => {
+    const [v, setV] = useState("");
+    return (
+      <Input
+        value={v}
+        onChange={(e) => setV(e.target.value)}
+        placeholder="Type to control"
+        className="max-w-md"
+      />
+    );
+  };
+}
 ```
 
 ### Disabled

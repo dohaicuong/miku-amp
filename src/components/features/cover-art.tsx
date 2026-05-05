@@ -22,10 +22,7 @@ type CoverArtProps = Omit<ComponentProps<"div">, "children"> & {
 export function CoverArt({ src, alt, className, rounded = "rounded-md", ...props }: CoverArtProps) {
   if (src) {
     return (
-      <div
-        className={cn("relative overflow-hidden bg-surface", rounded, className)}
-        {...props}
-      >
+      <div className={cn("relative overflow-hidden bg-surface", rounded, className)} {...props}>
         <img
           src={src}
           alt={alt}

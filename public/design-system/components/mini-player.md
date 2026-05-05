@@ -30,7 +30,7 @@ The actual fixed positioning lives at the call site via `className` so the docs 
       />
     </div>
   );
-}
+};
 ```
 
 ## Examples
@@ -71,7 +71,7 @@ The thin pink strip across the top reads as playback state — not interactive (
       />
     </div>
   );
-}
+};
 ```
 
 ### Without progress
@@ -93,7 +93,7 @@ The thin pink strip across the top reads as playback state — not interactive (
       />
     </div>
   );
-}
+};
 ```
 
 ### Wide viewport — prev / next visible
@@ -118,7 +118,7 @@ The thin pink strip across the top reads as playback state — not interactive (
       />
     </div>
   );
-}
+};
 ```
 
 ### Production wrapping
@@ -158,7 +158,7 @@ Missing `coverUrl` falls back to the music-note placeholder at the same 48 px fo
       />
     </div>
   );
-}
+};
 ```
 
 ## Props

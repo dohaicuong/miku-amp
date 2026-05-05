@@ -167,8 +167,8 @@ The popup has a `max-w-xs` cap so multi-line tips stay readable. Keep them short
   <Tooltip.Portal>
     <Tooltip.Positioner sideOffset={6}>
       <Tooltip.Popup>
-        Gapless playback removes the silence between consecutive tracks — essential for live
-        albums and continuous mixes where the audio bleeds across track boundaries.
+        Gapless playback removes the silence between consecutive tracks — essential for live albums
+        and continuous mixes where the audio bleeds across track boundaries.
         <Tooltip.Arrow />
       </Tooltip.Popup>
     </Tooltip.Positioner>

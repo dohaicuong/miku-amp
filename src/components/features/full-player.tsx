@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   CaretDownIcon,
   PauseIcon,
@@ -81,10 +82,18 @@ export function FullPlayer({
   onOpenLyrics,
   className,
 }: FullPlayerProps) {
-  const elapsed = fmtTime(progressSec);
+  // While the user is dragging the scrubber, the slider is "controlled" by
+  // this local override so the thumb (and the elapsed/remaining readouts)
+  // track the pointer in real time. On drop the override clears and `onSeek`
+  // pushes the new position upstream — the parent's `progressSec` then takes
+  // over again on the next render.
+  const [dragSec, setDragSec] = useState<number | null>(null);
+  const displaySec = dragSec ?? Math.min(progressSec, durationSec);
+
+  const elapsed = fmtTime(displaySec);
   // Negative remaining feels right for music players — readers know "how
   // much is left" rather than "how long until it ends from start".
-  const remaining = `-${fmtTime(Math.max(0, durationSec - progressSec))}`;
+  const remaining = `-${fmtTime(Math.max(0, durationSec - displaySec))}`;
   const RepeatGlyph = repeat === "one" ? RepeatOnceIcon : RepeatIcon;
   const repeatActive = repeat !== "off";
 
@@ -108,8 +117,12 @@ export function FullPlayer({
       <Slider
         min={0}
         max={Math.max(1, durationSec)}
-        value={[Math.min(progressSec, durationSec)]}
-        onValueCommitted={onSeek ? (value) => onSeek(value[0] ?? 0) : undefined}
+        value={displaySec}
+        onValueChange={setDragSec}
+        onValueCommitted={(v) => {
+          setDragSec(null);
+          onSeek?.(v);
+        }}
         aria-label="Seek track position"
       />
       <div className="flex items-center justify-between text-style-time text-fg-muted">

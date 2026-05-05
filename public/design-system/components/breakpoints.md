@@ -38,7 +38,7 @@ Tailwind's default min-width breakpoints, applied mobile-first. Every layout has
       ))}
     </div>
   );
-}
+};
 ```
 
 ## Mobile-first authoring
@@ -46,9 +46,7 @@ Tailwind's default min-width breakpoints, applied mobile-first. Every layout has
 Write the base style for the M500. Layer breakpoint prefixes on top to upgrade larger screens — they cascade up, so later breakpoints override earlier ones.
 
 ```tsx
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-  …
-</div>
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">…</div>
 ```
 
 In that example: M500 sees one column; `sm:` (≥640 px) jumps to two; `lg:` (≥1024 px) to three; `xl:` (≥1280 px) to four. Each step adds breathing room as the viewport widens.
@@ -62,8 +60,8 @@ In that example: M500 sees one column; `sm:` (≥640 px) jumps to two; `lg:` (�
 - **`xl:` ≥ 1280 px** — wider content max-widths; album grids step to four columns; the typography clamp() upper bound kicks in.
 - **`2xl:` ≥ 1536 px** — five-up album grids on a big monitor; hero surfaces breathe.
 
-## When *not* to add a breakpoint
+## When _not_ to add a breakpoint
 
-If the only thing changing across breakpoints is "things get a bit bigger", let the layout flow naturally. Reach for a breakpoint when the *structure* changes — number of columns, sidebar collapsed/expanded, stacked vs. side-by-side. Per-breakpoint font-size escalation is what the `clamp()`-based `text-style-display` / `text-style-heading-1` / `text-style-lead` utilities are for; you shouldn't need `text-base sm:text-lg md:text-xl` ladders.
+If the only thing changing across breakpoints is "things get a bit bigger", let the layout flow naturally. Reach for a breakpoint when the _structure_ changes — number of columns, sidebar collapsed/expanded, stacked vs. side-by-side. Per-breakpoint font-size escalation is what the `clamp()`-based `text-style-display` / `text-style-heading-1` / `text-style-lead` utilities are for; you shouldn't need `text-base sm:text-lg md:text-xl` ladders.
 
 Avoid `max-*` reverse breakpoints unless a layout truly needs phone-only treatment — they fight the mobile-first cascade and tend to leave one viewport size with no rules at all when later edits change the source order.

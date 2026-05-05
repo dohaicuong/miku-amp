@@ -59,10 +59,7 @@ export function MiniPlayer({
       )}
     >
       {progressPct !== null ? (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-bg"
-        >
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-bg">
           <div className="h-full bg-highlight" style={{ width: progressPct }} />
         </div>
       ) : null}

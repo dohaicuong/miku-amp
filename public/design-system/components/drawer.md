@@ -16,8 +16,8 @@ A panel that slides in from any edge — right or left for side drawers, bottom 
       <Drawer.Title>Settings</Drawer.Title>
       <Drawer.Description>Player preferences</Drawer.Description>
       <p className="text-style-body mt-2 text-fg">
-        Tune the output gain, replay-gain mode, and crossfade. The drawer traps focus while open
-        and returns it to the trigger on close.
+        Tune the output gain, replay-gain mode, and crossfade. The drawer traps focus while open and
+        returns it to the trigger on close.
       </p>
       <div className="mt-auto flex justify-end gap-2">
         <Drawer.Close render={<Button variant="ghost">Cancel</Button>} />
