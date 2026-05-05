@@ -36,6 +36,8 @@ export function pwaSetupPlugin() {
       "apple-touch-icon.png",
       "icon-192.png",
       "icon-512.png",
+      "icon-192-maskable.png",
+      "icon-512-maskable.png",
     ],
     manifest: {
       name: "Miku Amp",
@@ -50,6 +52,12 @@ export function pwaSetupPlugin() {
       theme_color: "#39c5bd",
       background_color: "#0a0d0f",
       display: "standalone",
+      // Two purposes per size:
+      //  - `any`: shown as-is (used by iOS apple-touch fallback, browsers
+      //    that don't apply masking). Our rounded squares.
+      //  - `maskable`: launcher-cropped (Niagara, Pixel, Samsung One UI).
+      //    Full-bleed dark canvas + content in central 80% safe zone, so
+      //    any circle/squircle mask leaves the character intact.
       icons: [
         {
           src: "icon-192.png",
@@ -62,6 +70,18 @@ export function pwaSetupPlugin() {
           sizes: "512x512",
           type: "image/png",
           purpose: "any",
+        },
+        {
+          src: "icon-192-maskable.png",
+          sizes: "192x192",
+          type: "image/png",
+          purpose: "maskable",
+        },
+        {
+          src: "icon-512-maskable.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "maskable",
         },
       ],
     },
