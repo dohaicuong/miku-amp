@@ -11,12 +11,19 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LibraryRouteRouteImport } from './routes/library/route'
 import { Route as ComponentsRouteRouteImport } from './routes/components/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LibraryIndexRouteImport } from './routes/library/index'
 import { Route as ComponentsIndexRouteImport } from './routes/components/index'
 
 const ComponentsSlugLazyRouteImport = createFileRoute('/components/$slug')()
 
+const LibraryRouteRoute = LibraryRouteRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ComponentsRouteRoute = ComponentsRouteRouteImport.update({
   id: '/components',
   path: '/components',
@@ -26,6 +33,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryIndexRoute = LibraryIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LibraryRouteRoute,
 } as any)
 const ComponentsIndexRoute = ComponentsIndexRouteImport.update({
   id: '/',
@@ -43,36 +55,62 @@ const ComponentsSlugLazyRoute = ComponentsSlugLazyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/components': typeof ComponentsRouteRouteWithChildren
+  '/library': typeof LibraryRouteRouteWithChildren
   '/components/$slug': typeof ComponentsSlugLazyRoute
   '/components/': typeof ComponentsIndexRoute
+  '/library/': typeof LibraryIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/components/$slug': typeof ComponentsSlugLazyRoute
   '/components': typeof ComponentsIndexRoute
+  '/library': typeof LibraryIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/components': typeof ComponentsRouteRouteWithChildren
+  '/library': typeof LibraryRouteRouteWithChildren
   '/components/$slug': typeof ComponentsSlugLazyRoute
   '/components/': typeof ComponentsIndexRoute
+  '/library/': typeof LibraryIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/components' | '/components/$slug' | '/components/'
+  fullPaths:
+    | '/'
+    | '/components'
+    | '/library'
+    | '/components/$slug'
+    | '/components/'
+    | '/library/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/components/$slug' | '/components'
-  id: '__root__' | '/' | '/components' | '/components/$slug' | '/components/'
+  to: '/' | '/components/$slug' | '/components' | '/library'
+  id:
+    | '__root__'
+    | '/'
+    | '/components'
+    | '/library'
+    | '/components/$slug'
+    | '/components/'
+    | '/library/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ComponentsRouteRoute: typeof ComponentsRouteRouteWithChildren
+  LibraryRouteRoute: typeof LibraryRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/components': {
       id: '/components'
       path: '/components'
@@ -86,6 +124,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/library/': {
+      id: '/library/'
+      path: '/'
+      fullPath: '/library/'
+      preLoaderRoute: typeof LibraryIndexRouteImport
+      parentRoute: typeof LibraryRouteRoute
     }
     '/components/': {
       id: '/components/'
@@ -118,9 +163,22 @@ const ComponentsRouteRouteWithChildren = ComponentsRouteRoute._addFileChildren(
   ComponentsRouteRouteChildren,
 )
 
+interface LibraryRouteRouteChildren {
+  LibraryIndexRoute: typeof LibraryIndexRoute
+}
+
+const LibraryRouteRouteChildren: LibraryRouteRouteChildren = {
+  LibraryIndexRoute: LibraryIndexRoute,
+}
+
+const LibraryRouteRouteWithChildren = LibraryRouteRoute._addFileChildren(
+  LibraryRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ComponentsRouteRoute: ComponentsRouteRouteWithChildren,
+  LibraryRouteRoute: LibraryRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

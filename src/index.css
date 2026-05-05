@@ -27,6 +27,11 @@
 
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+  /* Extra breakpoint past Tailwind's default 2xl (96rem / 1536 px) for
+     ultrawide library grids — 3xl kicks in at 120 rem (1920 px) so the
+     album shelf can fan out to 7 columns on a 4K-ish monitor. */
+  --breakpoint-3xl: 120rem;
 }
 
 /*

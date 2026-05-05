@@ -50,10 +50,13 @@ import { AnimatedIcon, ANIMATED_ICON_NAMES } from "@/components/features/animate
 import { ArtistCard } from "@/components/features/artist-card";
 import { BottomNav } from "@/components/features/bottom-nav";
 import { CoverArt } from "@/components/features/cover-art";
+import { DirectoryRow } from "@/components/features/directory-row";
 import { FullPlayer } from "@/components/features/full-player";
+import { LandingScreen } from "@/components/features/landing-screen";
 import { LyricView } from "@/components/features/lyric-view";
 import { MiniPlayer } from "@/components/features/mini-player";
 import { TrackRow } from "@/components/features/track-row";
+import { VolumeView } from "@/components/features/volume-view";
 import { asset } from "@/lib/asset";
 import type { DocScope } from "@/components/docs/component-doc";
 
@@ -82,10 +85,13 @@ export const docPool: DocScope = {
   ArtistCard,
   BottomNav,
   CoverArt,
+  DirectoryRow,
   FullPlayer,
+  LandingScreen,
   LyricView,
   MiniPlayer,
   TrackRow,
+  VolumeView,
   // Hooks
   useToast,
   // Helpers

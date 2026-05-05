@@ -301,6 +301,12 @@ Hisameku no wa anata no koe`;
     "description": "Tap a timed line to seek there. When omitted, lines render as static read-only text. Ignored when `lyrics` is a string."
   },
   {
+    "prop": "onClose",
+    "type": "() => void",
+    "default": "—",
+    "description": "When provided, renders a close X in the header. Use when the panel is surfaced as the FullPlayer's wide-layout right column — the panel must ship its own close UI since FullPlayer doesn't render one. Drawer-based narrow surfaces typically omit this since the Drawer's backdrop / Esc already handles dismiss."
+  },
+  {
     "prop": "className",
     "type": "string",
     "default": "—",

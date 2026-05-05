@@ -31,13 +31,13 @@ export function pwaSetupPlugin() {
     // up by globPatterns (which only sweeps the app shell). Listing them
     // here ensures they're precached.
     includeAssets: [
-      "favicon-16.png",
-      "favicon-32.png",
-      "apple-touch-icon.png",
-      "icon-192.png",
-      "icon-512.png",
-      "icon-192-maskable.png",
-      "icon-512-maskable.png",
+      "app-icons/favicon-16.png",
+      "app-icons/favicon-32.png",
+      "app-icons/apple-touch-icon.png",
+      "app-icons/icon-192.png",
+      "app-icons/icon-512.png",
+      "app-icons/icon-192-maskable.png",
+      "app-icons/icon-512-maskable.png",
     ],
     manifest: {
       name: "Miku Amp",
@@ -60,25 +60,25 @@ export function pwaSetupPlugin() {
       //    any circle/squircle mask leaves the character intact.
       icons: [
         {
-          src: "icon-192.png",
+          src: "app-icons/icon-192.png",
           sizes: "192x192",
           type: "image/png",
           purpose: "any",
         },
         {
-          src: "icon-512.png",
+          src: "app-icons/icon-512.png",
           sizes: "512x512",
           type: "image/png",
           purpose: "any",
         },
         {
-          src: "icon-192-maskable.png",
+          src: "app-icons/icon-192-maskable.png",
           sizes: "192x192",
           type: "image/png",
           purpose: "maskable",
         },
         {
-          src: "icon-512-maskable.png",
+          src: "app-icons/icon-512-maskable.png",
           sizes: "512x512",
           type: "image/png",
           purpose: "maskable",

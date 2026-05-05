@@ -70,11 +70,14 @@ const featuresGroup: NavGroupConfig = {
     { to: "/components/album-card", label: "Album Card" },
     { to: "/components/animated-icon", label: "Animated Icon" },
     { to: "/components/artist-card", label: "Artist Card" },
+    { to: "/components/directory-row", label: "Directory Row" },
     { to: "/components/bottom-nav", label: "Bottom Nav" },
     { to: "/components/track-row", label: "Track Row" },
     { to: "/components/mini-player", label: "Mini Player" },
     { to: "/components/full-player", label: "Full Player" },
+    { to: "/components/landing-screen", label: "Landing Screen" },
     { to: "/components/lyric-view", label: "Lyric View" },
+    { to: "/components/volume-view", label: "Volume View" },
   ],
 };
 
@@ -108,6 +111,7 @@ function ComponentsLayout() {
   return (
     <div className="h-dvh flex">
       <aside
+        data-scroll-restoration-id="docs-sidebar"
         className={cn(
           "shrink-0 border-r border-border py-12 flex flex-col gap-1",
           "overflow-y-auto scroll-style transition-[width] duration-200",
@@ -213,8 +217,8 @@ function ComponentsLayout() {
           </Accordion>
         )}
       </aside>
-      <main className="flex-1 overflow-y-auto scroll-style">
-        <div className="px-12 py-12 max-w-6xl">
+      <main data-scroll-restoration-id="docs-main" className="flex-1 overflow-y-auto scroll-style">
+        <div className="px-12 py-12 max-w-[88rem]">
           <Outlet />
         </div>
       </main>

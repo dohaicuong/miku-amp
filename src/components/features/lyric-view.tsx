@@ -1,6 +1,8 @@
 import { Button as BaseButton } from "@base-ui/react/button";
+import { XIcon } from "@phosphor-icons/react";
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/cn";
+import { IconButton } from "@/components/primitives/icon-button";
 import { TrackRow } from "@/components/features/track-row";
 
 // One line of timed lyrics. `timeSec` is the absolute track position at which
@@ -35,6 +37,13 @@ type LyricViewProps = {
   // (still readable, no hover/focus chrome). Ignored for plain-text.
   onSeek?: (seconds: number) => void;
 
+  // When provided, renders a close X in the header. Used when the panel is
+  // surfaced as the FullPlayer's wide-layout right column — the panel must
+  // ship its own close UI since FullPlayer doesn't render one. Drawer-based
+  // narrow surfaces typically omit this (Drawer's backdrop / Esc handles
+  // dismiss).
+  onClose?: () => void;
+
   className?: string;
 };
 
@@ -53,23 +62,39 @@ export function LyricView({
   lyrics,
   currentTimeSec = 0,
   onSeek,
+  onClose,
   className,
 }: LyricViewProps) {
   return (
     <div className={cn("flex h-full flex-col bg-bg text-fg", className)}>
       {/* Wrapping div carries the divider — TrackRow's own border-b is
-          stripped by `last:border-b-0` when it's the only child. */}
-      <div className="shrink-0 border-b border-border">
-        <TrackRow
-          title={title}
-          artist={artist}
-          album={album}
-          coverUrl={coverUrl}
-          duration={duration}
-          format={format}
-          bitrate={bitrate}
-          bitDepth={bitDepth}
-        />
+          stripped by `last:border-b-0` when it's the only child. The close
+          X (when provided) sits as a flex sibling so it doesn't compete with
+          TrackRow's own click target. */}
+      <div className="shrink-0 flex items-center border-b border-border">
+        <div className="min-w-0 flex-1">
+          <TrackRow
+            title={title}
+            artist={artist}
+            album={album}
+            coverUrl={coverUrl}
+            duration={duration}
+            format={format}
+            bitrate={bitrate}
+            bitDepth={bitDepth}
+          />
+        </div>
+        {onClose ? (
+          <IconButton
+            variant="ghost"
+            size="sm"
+            aria-label="Close lyrics"
+            onClick={onClose}
+            className="mr-3 shrink-0 text-fg-muted hover:text-fg"
+          >
+            <XIcon weight="bold" />
+          </IconButton>
+        ) : null}
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto scroll-style">
         {Array.isArray(lyrics) ? (

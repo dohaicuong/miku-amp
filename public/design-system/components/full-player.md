@@ -1,11 +1,14 @@
 ```scope
 FullPlayer
+LyricView
+VolumeView
+Drawer
 asset
 ```
 
 # Full Player
 
-The fullscreen now-playing surface. Hero-cover layout tuned for the M500's portrait viewport — top collapse bar, square cover, title / artist / album block, secondary-action row (lyrics; volume / EQ / filters will join later), scrubber, transport row. Pure presentational; orchestrating the mini ↔ full transition and the action panels is the parent's job.
+The fullscreen now-playing surface. Single-column hero-cover layout — top collapse bar, square cover, title / artist / album block, secondary-action row (lyrics + volume so far; EQ / filters will join later), scrubber, transport row. The column is capped at `max-w-md` and centred so the same shape reads cleanly on the M500's 360 px viewport and a 4K monitor. Pure presentational; orchestrating the mini ↔ full transition and the action panels is the parent's job (Drawers for lyrics + volume).
 
 ```tsx preview
 () => {
@@ -44,50 +47,34 @@ The fullscreen now-playing surface. Hero-cover layout tuned for the M500's portr
 
 ## Examples
 
-### M500 viewport
+### With action panels
 
-The intended target: 360 × 640 portrait. Cover sits ~280 px square; title/artist/album, the action row, scrubber, and transport stack below.
-
-```tsx preview
-() => {
-  const [playing, setPlaying] = useState(true);
-  const [progressSec, setProgressSec] = useState(72);
-  return (
-    <div className="border border-border rounded-md overflow-hidden mx-auto w-[360px] h-[640px]">
-      <FullPlayer
-        title="Tell Your World"
-        artist="livetune feat. Hatsune Miku"
-        album="Re:Dial"
-        coverUrl={asset("wallpaper.jpg")}
-        playing={playing}
-        progressSec={progressSec}
-        durationSec={265}
-        quality="FLAC · 24/96"
-        onPlayPause={() => setPlaying((p) => !p)}
-        onSeek={setProgressSec}
-        onCollapse={() => {}}
-        onPrev={() => {}}
-        onNext={() => {}}
-        onOpenLyrics={() => {}}
-      />
-    </div>
-  );
-};
-```
-
-### Desktop hero (wide container)
-
-When the FullPlayer's own container is `@3xl` (≥48 rem) wide the layout flips to a side-by-side hero — cover on the left (~30 rem max), title/artist/quality + scrubber + transport on the right, both columns vertically centred inside `max-w-5xl`. Reads as a real desktop player rather than a stretched portrait. The switch is a container query, not a viewport breakpoint, so a narrow FullPlayer dropped into a wide page (e.g. a 360 px preview frame on a desktop monitor) still gets the portrait layout. The portrait layout in narrower containers stays exactly as the previous examples show.
-
-The preview below pins the FullPlayer at 52 rem and lets the doc frame scroll horizontally if the article isn't wide enough to fit it inline.
+`onOpenLyrics` and `onOpenVolume` emit on tap — `FullPlayer` itself doesn't render the panels, the parent decides. Both panels surface as bottom Drawers regardless of viewport: `LyricView` gets a near-full sheet (`h-[85vh]`), `VolumeView` a shorter one since two knobs need less room. Tapping a timed lyric line seeks the player and dismisses the lyrics drawer so the wiring feels live.
 
 ```tsx preview
 () => {
   const [playing, setPlaying] = useState(true);
-  const [progressSec, setProgressSec] = useState(72);
+  const [progressSec, setProgressSec] = useState(20);
+  const [lyricsOpen, setLyricsOpen] = useState(false);
+  const [volumeOpen, setVolumeOpen] = useState(false);
+  const [volume, setVolume] = useState(45);
+  const [balance, setBalance] = useState(0);
+  const lines = [
+    { timeSec: 0, text: "" },
+    { timeSec: 4, text: "どこまでも続く 空の青さに" },
+    { timeSec: 9, text: "ぽっかり浮かんだ 君の声" },
+    { timeSec: 14, text: "" },
+    { timeSec: 16, text: "Tell your world" },
+    { timeSec: 20, text: "声を聞かせてよ 君の言葉で" },
+    { timeSec: 26, text: "Tell your world" },
+    { timeSec: 30, text: "心開いて ほら 受け止めるから" },
+    { timeSec: 36, text: "" },
+    { timeSec: 40, text: "繋がりたい 伝えたい" },
+    { timeSec: 46, text: "もう一人じゃないから" },
+  ];
   return (
-    <div className="-mx-6 px-6 overflow-x-auto scroll-style">
-      <div className="border border-border rounded-md overflow-hidden w-[52rem] h-[640px]">
+    <>
+      <div className="border border-border rounded-md overflow-hidden mx-auto w-[360px] h-[640px]">
         <FullPlayer
           title="Tell Your World"
           artist="livetune feat. Hatsune Miku"
@@ -102,10 +89,47 @@ The preview below pins the FullPlayer at 52 rem and lets the doc frame scroll ho
           onCollapse={() => {}}
           onPrev={() => {}}
           onNext={() => {}}
-          onOpenLyrics={() => {}}
+          onOpenLyrics={() => setLyricsOpen(true)}
+          onOpenVolume={() => setVolumeOpen(true)}
         />
       </div>
-    </div>
+      <Drawer open={lyricsOpen} onOpenChange={setLyricsOpen}>
+        <Drawer.Portal>
+          <Drawer.Backdrop />
+          <Drawer.Popup side="bottom" className="h-[85vh] p-0 gap-0">
+            <LyricView
+              title="Tell Your World"
+              artist="livetune"
+              album="Re:Dial"
+              coverUrl={asset("wallpaper.jpg")}
+              duration="4:25"
+              format="FLAC"
+              bitrate="3072 kbps"
+              bitDepth="24-bit"
+              lyrics={lines}
+              currentTimeSec={progressSec}
+              onSeek={(s) => {
+                setProgressSec(s);
+                setLyricsOpen(false);
+              }}
+            />
+          </Drawer.Popup>
+        </Drawer.Portal>
+      </Drawer>
+      <Drawer open={volumeOpen} onOpenChange={setVolumeOpen}>
+        <Drawer.Portal>
+          <Drawer.Backdrop />
+          <Drawer.Popup side="bottom" className="h-[60vh] p-0 gap-0">
+            <VolumeView
+              volume={volume}
+              onVolumeChange={setVolume}
+              balance={balance}
+              onBalanceChange={setBalance}
+            />
+          </Drawer.Popup>
+        </Drawer.Portal>
+      </Drawer>
+    </>
   );
 };
 ```
@@ -284,6 +308,12 @@ Active shuffle / repeat read as `text-accent` (cyan) on the trailing icons; off-
     "type": "() => void",
     "default": "—",
     "description": "Fires when the lyrics action button is tapped. Wire to whatever surfaces the LyricView (full-screen modal on portrait; right-column swap on the @3xl hero). Button is hidden when omitted."
+  },
+  {
+    "prop": "onOpenVolume",
+    "type": "() => void",
+    "default": "—",
+    "description": "Fires when the volume action button is tapped. Same hide-when-omitted pattern as `onOpenLyrics`. Canonical surface is the VolumeView in a bottom Drawer."
   },
   {
     "prop": "className",
