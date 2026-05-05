@@ -9,12 +9,12 @@ Cover-art-led tile for the album grid. No card chrome by default — the cover d
 
 ```tsx preview
 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 w-full">
-  <AlbumCard title="Supercell" artist="supercell" year={2009} coverUrl={asset("wallpaper.png")} />
+  <AlbumCard title="Supercell" artist="supercell" year={2009} coverUrl={asset("wallpaper.jpg")} />
   <AlbumCard
     title="World Is Mine"
     artist="supercell"
     year={2008}
-    coverUrl={asset("wallpaper.png")}
+    coverUrl={asset("wallpaper.jpg")}
   />
   <AlbumCard title="Tell Your World" artist="livetune feat. Hatsune Miku" year={2012} />
   <AlbumCard title="Romeo and Cinderella" artist="doriko" year={2009} />

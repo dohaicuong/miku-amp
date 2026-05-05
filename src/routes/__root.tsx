@@ -1,5 +1,6 @@
 import { Outlet, createRootRoute } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { PwaUpdateToast } from "@/components/features/pwa-update-toast";
 import { Toast } from "@/components/primitives/toast";
 import { Tooltip } from "@/components/primitives/tooltip";
 
@@ -17,6 +18,7 @@ function RootComponent() {
       <Tooltip.Provider>
         <Outlet />
         <Toast.Viewport />
+        <PwaUpdateToast />
       </Tooltip.Provider>
       {import.meta.env.DEV ? <TanStackRouterDevtools position="bottom-right" /> : null}
     </Toast.Provider>

@@ -68,6 +68,7 @@ const featuresGroup: NavGroupConfig = {
   items: [
     { to: "/components/cover-art", label: "Cover Art" },
     { to: "/components/album-card", label: "Album Card" },
+    { to: "/components/animated-icon", label: "Animated Icon" },
     { to: "/components/artist-card", label: "Artist Card" },
     { to: "/components/bottom-nav", label: "Bottom Nav" },
     { to: "/components/track-row", label: "Track Row" },

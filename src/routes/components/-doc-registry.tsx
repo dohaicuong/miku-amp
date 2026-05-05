@@ -46,6 +46,7 @@ import { Tabs } from "@/components/primitives/tabs";
 import { useToast } from "@/components/primitives/toast";
 import { Tooltip } from "@/components/primitives/tooltip";
 import { AlbumCard } from "@/components/features/album-card";
+import { AnimatedIcon, ANIMATED_ICON_NAMES } from "@/components/features/animated-icon";
 import { ArtistCard } from "@/components/features/artist-card";
 import { BottomNav } from "@/components/features/bottom-nav";
 import { CoverArt } from "@/components/features/cover-art";
@@ -76,6 +77,8 @@ export const docPool: DocScope = {
   Tooltip,
   // Features
   AlbumCard,
+  AnimatedIcon,
+  ANIMATED_ICON_NAMES,
   ArtistCard,
   BottomNav,
   CoverArt,

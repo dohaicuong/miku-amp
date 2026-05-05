@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import { pwaSetupPlugin } from "./vite-plugins/pwa-setup.ts";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -24,5 +25,10 @@ export default defineConfig({
   },
   // tanstackRouter must run before @vitejs/plugin-react so its codegen lands
   // before React's transform sees the file.
-  plugins: [tanstackRouter({ target: "react", autoCodeSplitting: true }), react(), tailwindcss()],
+  plugins: [
+    tanstackRouter({ target: "react", autoCodeSplitting: true }),
+    react(),
+    tailwindcss(),
+    pwaSetupPlugin(),
+  ],
 });

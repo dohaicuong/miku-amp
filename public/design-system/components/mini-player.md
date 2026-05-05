@@ -22,7 +22,7 @@ The actual fixed positioning lives at the call site via `className` so the docs 
       <MiniPlayer
         title="World Is Mine"
         artist="supercell"
-        coverUrl={asset("wallpaper.png")}
+        coverUrl={asset("wallpaper.jpg")}
         playing={playing}
         progress={0.42}
         onPlayPause={() => setPlaying((p) => !p)}
@@ -47,7 +47,7 @@ The thin pink strip across the top reads as playback state — not interactive (
       <MiniPlayer
         title="World Is Mine"
         artist="supercell"
-        coverUrl={asset("wallpaper.png")}
+        coverUrl={asset("wallpaper.jpg")}
         playing={playing}
         progress={0.12}
         onPlayPause={() => setPlaying((p) => !p)}
@@ -86,7 +86,7 @@ The thin pink strip across the top reads as playback state — not interactive (
       <MiniPlayer
         title="Senbonzakura"
         artist="Kurousa-P feat. Hatsune Miku"
-        coverUrl={asset("wallpaper.png")}
+        coverUrl={asset("wallpaper.jpg")}
         playing={playing}
         onPlayPause={() => setPlaying((p) => !p)}
         onExpand={() => {}}
@@ -108,7 +108,7 @@ The thin pink strip across the top reads as playback state — not interactive (
       <MiniPlayer
         title="The Disappearance of Hatsune Miku"
         artist="cosMo @BousouP"
-        coverUrl={asset("wallpaper.png")}
+        coverUrl={asset("wallpaper.jpg")}
         playing={playing}
         progress={0.31}
         onPlayPause={() => setPlaying((p) => !p)}

@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Local-only reference assets pulled from M500 device for design inspiration.
+# Contains HiBy / Crypton / KLWP-vendor IP — never commit, never deploy.
+public/_reference/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

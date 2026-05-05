@@ -9,7 +9,7 @@ The image surface every album/track/artist tile + row in the app uses. Renders a
 
 ```tsx preview
 <CoverArt
-  src={asset("wallpaper.png")}
+  src={asset("wallpaper.jpg")}
   alt="World Is Mine — supercell"
   className="aspect-square w-40"
 />
@@ -23,9 +23,9 @@ The standard surface — `<img>` lazy-loaded, `object-cover` to fill any aspect 
 
 ```tsx preview
 <div className="flex flex-wrap items-end gap-4">
-  <CoverArt src={asset("wallpaper.png")} alt="World Is Mine" className="aspect-square w-32" />
-  <CoverArt src={asset("wallpaper.png")} alt="World Is Mine" className="aspect-square w-20" />
-  <CoverArt src={asset("wallpaper.png")} alt="World Is Mine" className="aspect-square w-12" />
+  <CoverArt src={asset("wallpaper.jpg")} alt="World Is Mine" className="aspect-square w-32" />
+  <CoverArt src={asset("wallpaper.jpg")} alt="World Is Mine" className="aspect-square w-20" />
+  <CoverArt src={asset("wallpaper.jpg")} alt="World Is Mine" className="aspect-square w-12" />
 </div>
 ```
 
@@ -49,19 +49,19 @@ No `src` → music-note placeholder on `bg-surface`. Same dimensions; the surfac
 <div className="flex flex-wrap items-end gap-4">
   <CoverArt
     alt="Album"
-    src={asset("wallpaper.png")}
+    src={asset("wallpaper.jpg")}
     className="aspect-square w-24"
     rounded="rounded-md"
   />
   <CoverArt
     alt="Track thumb"
-    src={asset("wallpaper.png")}
+    src={asset("wallpaper.jpg")}
     className="aspect-square w-12"
     rounded="rounded-sm"
   />
   <CoverArt
     alt="Artist"
-    src={asset("wallpaper.png")}
+    src={asset("wallpaper.jpg")}
     className="aspect-square w-24"
     rounded="rounded-full"
   />
