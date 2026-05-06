@@ -91,6 +91,18 @@
     -webkit-font-smoothing: antialiased;
     @apply scroll-style;
   }
+
+  /* Suppress focus outlines on pure touch devices (no hover, coarse
+     pointer). Tap-induced focus rings on mobile usually look like a
+     visual glitch — there's no keyboard navigation context to justify
+     them. iPad / Surface with a keyboard report `(any-hover: hover)`
+     and so still get the focus ring on Tab as expected. */
+  @media (hover: none) and (pointer: coarse) {
+    *:focus,
+    *:focus-visible {
+      outline: none !important;
+    }
+  }
 }
 
 /* =====================================================================
