@@ -11,7 +11,13 @@ import { AlbumCard } from "@/components/features/album-card";
 import { DirectoryRow } from "@/components/features/directory-row";
 import { TrackRow } from "@/components/features/track-row";
 import { useLibraries, type Library } from "@/lib/library-handle";
-import { countTracks, findFolder, findTrackByPath } from "@/lib/library";
+import {
+  countTracks,
+  findFolder,
+  findTrackByPath,
+  type AudioTrack,
+  type FolderNode,
+} from "@/lib/library";
 import { usePlayer } from "@/lib/player-context";
 import { loadPlaybackState } from "@/lib/library-storage";
 import { Menu } from "@/components/primitives/menu";
@@ -143,17 +149,99 @@ export function FoldersView({
     return <EmptyState onReset={() => setPath([])} />;
   }
 
+  // Parent folder peek — only computed when there's a parent to walk up
+  // to. Rendered behind the live page so a back-swipe reveals where
+  // we're going instead of just the dark body bg.
+  const parentPath = path.slice(0, -1);
+  const parentHere = canSwipeBack ? findFolder(root, parentPath) : null;
+  const playing = player.current?.handle ?? null;
+  const onPlay = (track: AudioTrack, queue: AudioTrack[]) =>
+    void player.playTrack(track, { queue });
+  const onSwitchMenu = onSwitchLibrary;
+  const onRescanMenu = () => void rescan(active.id);
+  const onRemoveMenu = () => void removeLibrary(active.id);
+
   return (
-    <div
-      ref={containerRef}
-      {...bind()}
-      className="min-h-dvh flex flex-col bg-bg text-fg touch-pan-y"
-    >
+    <div className="relative h-dvh overflow-hidden">
+      {parentHere ? (
+        // Inert peek of the parent folder behind the live page. Pointer
+        // events are off so taps fall through to the page on top, and
+        // aria-hidden keeps the duplicated content out of the a11y tree.
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <FolderPage
+            here={parentHere}
+            path={parentPath}
+            library={active}
+            libraries={libraries}
+            playingHandle={playing}
+            playerActive={!!player.current}
+            onNavigate={() => {}}
+            onSwitch={() => {}}
+            onRescan={() => {}}
+            onRemove={() => {}}
+            onPlay={() => {}}
+          />
+        </div>
+      ) : null}
+      <div ref={containerRef} {...bind()} className="absolute inset-0 touch-pan-y">
+        <FolderPage
+          here={here}
+          path={path}
+          library={active}
+          libraries={libraries}
+          playingHandle={playing}
+          playerActive={!!player.current}
+          onNavigate={setPath}
+          onSwitch={onSwitchMenu}
+          onRescan={onRescanMenu}
+          onRemove={onRemoveMenu}
+          onPlay={onPlay}
+        />
+      </div>
+    </div>
+  );
+}
+
+// Pure render of a single folder page (header + scrollable list). Stamped
+// twice by FoldersView: once as an inert peek of the parent (so a back-
+// swipe reveals the destination instead of the body bg), once as the
+// interactive live page.
+function FolderPage({
+  here,
+  path,
+  library,
+  libraries,
+  playingHandle,
+  playerActive,
+  onNavigate,
+  onSwitch,
+  onRescan,
+  onRemove,
+  onPlay,
+}: {
+  here: FolderNode;
+  path: string[];
+  library: Library;
+  libraries: Library[];
+  // Identity of the currently-playing track's handle, for the row's
+  // "playing" highlight. Pass null when nothing is playing.
+  playingHandle: FileSystemFileHandle | null;
+  // Drives the bottom padding so the last row clears the BottomNav and
+  // (when active) the MiniPlayer.
+  playerActive: boolean;
+  onNavigate: (path: string[]) => void;
+  onSwitch: (id: string) => void;
+  onRescan: () => void;
+  onRemove: () => void;
+  onPlay: (track: AudioTrack, queue: AudioTrack[]) => void;
+}) {
+  return (
+    <div className="h-full flex flex-col bg-bg text-fg">
       <header className="shrink-0 border-b border-border px-5 py-5 flex items-center gap-3">
         {path.length > 0 ? (
           <button
             type="button"
-            onClick={() => setPath(path.slice(0, -1))}
+            onClick={() => onNavigate(path.slice(0, -1))}
             aria-label="Up one folder"
             className={cn(
               "shrink-0 inline-flex items-center justify-center rounded-md p-2",
@@ -167,28 +255,20 @@ export function FoldersView({
         <h1 className="text-style-heading-3 text-fg line-clamp-1 min-w-0 flex-1">{here.name}</h1>
         <LibraryMenu
           libraries={libraries}
-          activeId={active.id}
-          onSwitch={onSwitchLibrary}
-          onRescan={() => void rescan(active.id)}
-          onRemove={() => void removeLibrary(active.id)}
+          activeId={library.id}
+          onSwitch={onSwitch}
+          onRescan={onRescan}
+          onRemove={onRemove}
         />
       </header>
-      <div
-        className={cn(
-          "flex-1 overflow-y-auto scroll-style",
-          // Always clear the persistent BottomNav (~3.5rem) on mobile;
-          // bump the offset further when the MiniPlayer is also stacking
-          // above the nav.
-          player.current ? "pb-36" : "pb-16",
-        )}
-      >
+      <div className={cn("flex-1 overflow-y-auto scroll-style", playerActive ? "pb-36" : "pb-16")}>
         {here.folders.length === 0 && here.tracks.length === 0 ? (
           <FolderEmpty />
         ) : here.tracks.length > 0 ? (
           <div className="md:mx-auto md:max-w-3xl">
             <ul className="divide-y divide-border">
               {here.tracks.map((track) => {
-                const isCurrent = player.current?.handle === track.handle;
+                const isCurrent = playingHandle === track.handle;
                 return (
                   <li key={track.filename}>
                     <TrackRow
@@ -197,7 +277,7 @@ export function FoldersView({
                       coverUrl={here.coverUrl}
                       format={track.format}
                       playing={isCurrent}
-                      onClick={() => void player.playTrack(track, { queue: here.tracks })}
+                      onClick={() => onPlay(track, here.tracks)}
                     />
                   </li>
                 );
@@ -213,7 +293,7 @@ export function FoldersView({
                         name={folder.name}
                         trackCount={countTracks(folder)}
                         coverUrl={folder.coverUrl}
-                        onClick={() => setPath([...path, folder.name])}
+                        onClick={() => onNavigate([...path, folder.name])}
                       />
                     </li>
                   ))}
@@ -230,7 +310,7 @@ export function FoldersView({
                     name={folder.name}
                     trackCount={countTracks(folder)}
                     coverUrl={folder.coverUrl}
-                    onClick={() => setPath([...path, folder.name])}
+                    onClick={() => onNavigate([...path, folder.name])}
                   />
                 </li>
               ))}
@@ -244,7 +324,7 @@ export function FoldersView({
                     title={folder.name}
                     artist={`${count} ${count === 1 ? "track" : "tracks"}`}
                     coverUrl={folder.coverUrl}
-                    onClick={() => setPath([...path, folder.name])}
+                    onClick={() => onNavigate([...path, folder.name])}
                   />
                 );
               })}
