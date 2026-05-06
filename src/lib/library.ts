@@ -23,6 +23,10 @@ const COVER_STEMS = ["cover", "folder", "album", "front"];
 const COVER_RE = new RegExp(`^(${COVER_STEMS.join("|")})\\.(jpg|jpeg|png|webp)$`, "i");
 
 export type AudioTrack = {
+  // Identifier of the library root this track belongs to. Lets persisted
+  // playback state (track + offset) round-trip through IDB without having
+  // to also persist a separate "which library" pointer.
+  rootId: string;
   // Original filename including extension (e.g. "01 - World Is Mine.flac").
   filename: string;
   // Filename with extension stripped, used as the visible title until tag
@@ -37,13 +41,21 @@ export type AudioTrack = {
   folderPath: string[];
   // The file handle itself — opened lazily by the playback layer.
   handle: FileSystemFileHandle;
+  // Persisted alongside the track so cover blob URLs can be regenerated
+  // after IDB rehydrate (blob URLs themselves don't survive a reload).
+  coverHandle?: FileSystemFileHandle;
   // Cover URL inherited from the parent folder when one was detected
   // during the walk. Lets the player surface artwork without re-walking
-  // back up the tree at play time.
+  // back up the tree at play time. Re-created from `coverHandle` after a
+  // cache hydrate, so it's always live for the current session.
   coverUrl?: string;
 };
 
 export type FolderNode = {
+  // Identifier of the library root this folder belongs to (same value on
+  // every node in a given tree). Read from `rootId` on the top-level node
+  // when a route needs to know which library it's looking at.
+  rootId: string;
   // The folder's own name. The root's name is whatever the user picked
   // (e.g. "Music"); subfolders carry their dirent name.
   name: string;
@@ -55,6 +67,9 @@ export type FolderNode = {
   // Audio files directly inside this folder, sorted alphabetically. Files
   // with non-audio extensions are skipped at scan time.
   tracks: AudioTrack[];
+  // Persisted alongside the folder so cover blob URLs can be regenerated
+  // after an IDB hydrate.
+  coverHandle?: FileSystemFileHandle;
   // Blob URL of the folder's cover image, if one was detected during the
   // walk (a `cover.jpg` / `folder.jpg` / `album.jpg` / `front.jpg` sibling
   // of the audio files). Created via `URL.createObjectURL` and never
@@ -66,11 +81,22 @@ export type FolderNode = {
 // Recursive walk of a `FileSystemDirectoryHandle`. Errors on individual
 // entries (permission, transient I/O) are swallowed so a single bad child
 // doesn't abort the whole scan; the rest of the tree comes back as usual.
-export async function walkLibrary(root: FileSystemDirectoryHandle): Promise<FolderNode> {
-  return walk(root, []);
+//
+// `rootId` is stamped on every node and track so the resulting tree —
+// including any cached copy round-tripped through IDB — knows which
+// library it belongs to.
+export async function walkLibrary(
+  root: FileSystemDirectoryHandle,
+  rootId: string,
+): Promise<FolderNode> {
+  return walk(root, [], rootId);
 }
 
-async function walk(dir: FileSystemDirectoryHandle, prefix: string[]): Promise<FolderNode> {
+async function walk(
+  dir: FileSystemDirectoryHandle,
+  prefix: string[],
+  rootId: string,
+): Promise<FolderNode> {
   const folders: FolderNode[] = [];
   const tracks: AudioTrack[] = [];
   const here = [...prefix, dir.name];
@@ -103,6 +129,7 @@ async function walk(dir: FileSystemDirectoryHandle, prefix: string[]): Promise<F
         // Optimistic: name looks like an audio file → resolve as file.
         const handle = await dir.getFileHandle(name);
         tracks.push({
+          rootId,
           filename: name,
           title: stripExtension(name),
           format: extensionLabel(name),
@@ -127,7 +154,7 @@ async function walk(dir: FileSystemDirectoryHandle, prefix: string[]): Promise<F
       // through to file (and ignore) if it isn't a directory.
       try {
         const subDir = await dir.getDirectoryHandle(name);
-        const child = await walk(subDir, here);
+        const child = await walk(subDir, here, rootId);
         folders.push(child);
       } catch {
         // Non-audio file (cuesheet, log, booklet, etc.) — skip silently.
@@ -148,9 +175,14 @@ async function walk(dir: FileSystemDirectoryHandle, prefix: string[]): Promise<F
   }
 
   // Stamp the resolved cover onto each track so the player has artwork
-  // without walking back up the tree at play time.
-  if (coverUrl) {
-    for (const t of tracks) t.coverUrl = coverUrl;
+  // without walking back up the tree at play time. The cover *handle* is
+  // also stamped so a hydrate from IDB can rebuild blob URLs without
+  // re-walking the parent folder.
+  if (coverHandle) {
+    for (const t of tracks) {
+      t.coverHandle = coverHandle;
+      if (coverUrl) t.coverUrl = coverUrl;
+    }
   }
 
   console.log(
@@ -161,12 +193,38 @@ async function walk(dir: FileSystemDirectoryHandle, prefix: string[]): Promise<F
   tracks.sort((a, b) => a.filename.localeCompare(b.filename, undefined, { numeric: true }));
 
   return {
+    rootId,
     name: dir.name,
     path: prefix.length === 0 ? [] : here,
     folders,
     tracks,
+    coverHandle,
     coverUrl,
   };
+}
+
+// Walks a cached tree and re-creates blob URLs from each `coverHandle`.
+// Blob URLs from `URL.createObjectURL` don't survive a page reload, so the
+// `coverUrl` stored alongside the handle in IDB is always stale on
+// hydrate; this rebuilds it in-place. Tracks pick up the URL from their
+// parent folder's resolved cover (same propagation as the live scan).
+export async function hydrateCoverUrls(node: FolderNode): Promise<void> {
+  let coverUrl: string | undefined;
+  if (node.coverHandle) {
+    try {
+      const file = await node.coverHandle.getFile();
+      coverUrl = URL.createObjectURL(file);
+    } catch (err) {
+      console.warn(`[miku-amp] hydrate cover: ${node.path.join("/") || "(root)"}:`, err);
+    }
+  }
+  node.coverUrl = coverUrl;
+  for (const t of node.tracks) {
+    t.coverUrl = coverUrl;
+  }
+  for (const child of node.folders) {
+    await hydrateCoverUrls(child);
+  }
 }
 
 // Returns 0..N (lower = higher priority) for filenames matching one of the
@@ -195,6 +253,15 @@ function stripExtension(name: string): string {
 function extensionLabel(name: string): string {
   const dot = name.lastIndexOf(".");
   return dot > 0 ? name.slice(dot + 1).toUpperCase() : "";
+}
+
+// Recursive count of all audio files under a node (this folder + every
+// descendant). Used by the library views to surface a sense of how much
+// is inside before tapping in.
+export function countTracks(node: FolderNode): number {
+  let total = node.tracks.length;
+  for (const child of node.folders) total += countTracks(child);
+  return total;
 }
 
 // Walk the tree along a breadcrumb path of folder names. Returns null if any

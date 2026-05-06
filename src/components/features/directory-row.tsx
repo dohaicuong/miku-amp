@@ -9,7 +9,13 @@ type DirectoryRowProps = Omit<ComponentProps<typeof BaseButton>, "title"> & {
   name: string;
   // Recursive count of audio files under this folder. Reads as "12 tracks"
   // (or "1 track") under the name. Pass 0 explicitly for an empty folder.
-  trackCount: number;
+  // Ignored when `subtitle` is provided.
+  trackCount?: number;
+  // Free-form subtitle text — overrides the auto track-count line when
+  // present. Used by surfaces where the underlying tree isn't available
+  // (e.g. landing-screen pending libraries that need a permission
+  // re-grant before their tree can be inspected).
+  subtitle?: string;
   // When provided, replaces the folder icon with a cover thumbnail (the
   // existing CoverArt component, so missing / failed images fall back to
   // the music-note placeholder). Use for browse-by-album surfaces where
@@ -29,6 +35,7 @@ type DirectoryRowProps = Omit<ComponentProps<typeof BaseButton>, "title"> & {
 export function DirectoryRow({
   name,
   trackCount,
+  subtitle,
   coverUrl,
   className,
   render,
@@ -63,8 +70,10 @@ export function DirectoryRow({
       )}
       <div className="flex flex-1 flex-col min-w-0">
         <span className="text-style-body text-fg truncate">{name}</span>
-        <span className="text-style-caption text-fg-subtle tabular-nums">
-          {trackCount} {trackCount === 1 ? "track" : "tracks"}
+        <span className="text-style-caption text-fg-subtle tabular-nums truncate">
+          {subtitle !== undefined
+            ? subtitle
+            : `${trackCount ?? 0} ${trackCount === 1 ? "track" : "tracks"}`}
         </span>
       </div>
       <CaretRightIcon size={14} weight="bold" className="shrink-0 text-fg-muted" aria-hidden />

@@ -1,7 +1,8 @@
-import { Outlet, createRootRoute } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { Link, Outlet, createRootRoute } from "@tanstack/react-router";
+import { HouseIcon, MusicNotesIcon } from "@phosphor-icons/react";
 import { useDrag } from "@use-gesture/react";
 import { useRef } from "react";
+import { BottomNav } from "@/components/features/bottom-nav";
 import { FullPlayer } from "@/components/features/full-player";
 import { MiniPlayer } from "@/components/features/mini-player";
 import { PwaUpdateToast } from "@/components/features/pwa-update-toast";
@@ -11,22 +12,11 @@ import { Tooltip } from "@/components/primitives/tooltip";
 import { LibraryHandleProvider } from "@/lib/library-handle";
 import { PlayerProvider, usePlayer } from "@/lib/player-context";
 
-// Root-level search params: the currently playing track and its progress.
-// Held at the root so they survive route changes — a refresh of `/library`
-// or `/components/...` while audio is playing resumes from the same spot.
-// `track` is the file's path-from-root joined with `/`; `t` is whole seconds
-// of progress. Both are optional; missing or non-string/non-number values
-// fall back to undefined so a manually-mangled URL just lands on landing.
-type RootSearch = {
-  track?: string;
-  t?: number;
-};
-
+// Playback persistence (currently-playing track + progress) lives in
+// IndexedDB rather than the URL — see `library-storage.ts`. The throttled
+// progress writes were previously bouncing the library scroll position to
+// the top each second via TanStack Router's navigate, even with replace.
 export const Route = createRootRoute({
-  validateSearch: (search: Record<string, unknown>): RootSearch => ({
-    track: typeof search.track === "string" ? search.track : undefined,
-    t: typeof search.t === "number" ? search.t : undefined,
-  }),
   component: RootComponent,
 });
 
@@ -50,8 +40,9 @@ function RootComponent() {
             <PwaUpdateToast />
             <PersistentMiniPlayer />
             <PersistentFullPlayer />
+            <PersistentBottomNav />
           </Tooltip.Provider>
-          <TanStackRouterDevtools position="top-right" />
+          {/* <TanStackRouterDevtools position="top-right" /> */}
         </Toast.Provider>
       </PlayerProvider>
     </LibraryHandleProvider>
@@ -81,8 +72,32 @@ function PersistentMiniPlayer() {
       onPrev={player.playPrev}
       onNext={player.playNext}
       onExpand={player.expand}
-      className="fixed inset-x-0 bottom-0 z-40 md:inset-x-auto md:left-auto md:right-4 md:bottom-4 md:max-w-sm"
+      // Mobile: stack just above the BottomNav (bar is min-h-14 = 56px).
+      // Desktop: float bottom-right but lifted above the nav so the
+      // floating card doesn't sit on top of the rightmost nav item.
+      className="fixed inset-x-0 bottom-14 z-40 md:inset-x-auto md:left-auto md:right-4 md:bottom-20 md:max-w-sm"
     />
+  );
+}
+
+// Persistent bottom navigation. Pinned to the bottom of the viewport
+// across every route so the user always has a one-tap way home / into
+// the library. Home links go through `?stay=true` so the home route
+// doesn't auto-redirect a granted-library user straight back to /library.
+function PersistentBottomNav() {
+  return (
+    <BottomNav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-30">
+      <BottomNav.Item
+        icon={<HouseIcon weight="bold" />}
+        label="Home"
+        render={<Link to="/" search={{ stay: true }} activeOptions={{ exact: true }} />}
+      />
+      <BottomNav.Item
+        icon={<MusicNotesIcon weight="bold" />}
+        label="Library"
+        render={<Link to="/library" />}
+      />
+    </BottomNav>
   );
 }
 

@@ -6,14 +6,9 @@ import "./index.css";
 
 // `basepath` mirrors Vite's `base` so the router strips `/miku-amp/` (or
 // whatever Pages serves under) before matching routes. In dev it's "/".
-//
-// `scrollRestoration` makes the router remember per-route scroll positions
-// so back/forward + reload land the user where they left off — matters
-// most for the long folder lists in `/library/...` and the docs sidebar.
 const router = createRouter({
   routeTree,
   basepath: import.meta.env.BASE_URL,
-  scrollRestoration: true,
 });
 
 declare module "@tanstack/react-router" {

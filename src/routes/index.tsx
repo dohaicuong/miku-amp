@@ -1,48 +1,79 @@
 import { Navigate, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LandingScreen } from "@/components/features/landing-screen";
 import { useLibraryPicker } from "@/lib/library-picker";
-import { useLibraryHandle } from "@/lib/library-handle";
+import { useLibraries } from "@/lib/library-handle";
+import { countTracks } from "@/lib/library";
+
+// `?stay=1` opts out of the auto-redirect to /library that would otherwise
+// fire whenever an active library is set. Set by the library screen's
+// "Home" affordance so the user can deliberately land here without being
+// bounced straight back.
+type Search = { stay?: boolean };
 
 export const Route = createFileRoute("/")({
+  validateSearch: (search: Record<string, unknown>): Search => ({
+    stay: search.stay === true || search.stay === "true" || search.stay === 1 ? true : undefined,
+  }),
   component: HomePage,
 });
 
 function HomePage() {
   const picker = useLibraryPicker();
-  const { handle, pendingHandle, hydrating, setHandle, resumePending } = useLibraryHandle();
+  const {
+    libraries,
+    pendingLibraries,
+    activeId,
+    hydrating,
+    setActiveId,
+    addLibrary,
+    removeLibrary,
+    resumePending,
+  } = useLibraries();
   const navigate = useNavigate();
+  const { stay } = Route.useSearch();
 
-  // Hydration window — IDB load + permission probe is in flight. Render
-  // nothing for the brief moment to avoid flashing the landing CTA before
-  // we know whether the user already has a stored library to resume.
+  // Hydration window — IDB load + permission probes are in flight. Render
+  // nothing for the brief moment to avoid flashing the landing CTAs before
+  // we know whether the user has stored libraries to resume.
   if (hydrating) return null;
 
-  // Already-granted handle (rare in practice — Chromium resets permission
-  // on reload — but possible mid-session). Skip landing entirely.
-  // `search: (prev) => prev` keeps any inbound `?track=&t=` so the library
-  // route can pick them up and resume playback.
-  if (handle) return <Navigate to="/library" search={(prev) => prev} />;
+  // Auto-redirect when an active library is set, unless the user
+  // explicitly asked to stay via the home button.
+  if (activeId && !stay) return <Navigate to="/library" />;
 
-  const onPickFolder = async () => {
+  const onAddFolder = async () => {
     const next = await picker.pick();
     if (!next) return;
-    setHandle(next);
-    void navigate({ to: "/library", search: (prev) => prev });
+    const id = await addLibrary(next);
+    if (id) void navigate({ to: "/library" });
   };
 
-  const onResume = async () => {
-    const ok = await resumePending();
-    if (ok) void navigate({ to: "/library", search: (prev) => prev });
+  const onOpen = (id: string) => {
+    setActiveId(id);
+    void navigate({ to: "/library" });
+  };
+
+  const onResume = async (id: string) => {
+    const ok = await resumePending(id);
+    if (ok) void navigate({ to: "/library" });
   };
 
   return (
     <LandingScreen
-      onPickFolder={onPickFolder}
+      onAddFolder={onAddFolder}
       picking={picker.picking}
       supported={picker.supported}
       error={picker.error}
-      resumeFolderName={pendingHandle?.name}
+      libraries={libraries.map((l) => ({
+        id: l.id,
+        name: l.handle.name,
+        trackCount: countTracks(l.tree),
+        coverUrl: l.tree.coverUrl,
+      }))}
+      pendingLibraries={pendingLibraries.map((p) => ({ id: p.id, name: p.handle.name }))}
+      onOpen={onOpen}
       onResume={onResume}
+      onRemove={(id) => void removeLibrary(id)}
     />
   );
 }

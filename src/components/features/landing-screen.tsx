@@ -1,45 +1,67 @@
-import { ArrowClockwiseIcon, FolderOpenIcon, WarningIcon } from "@phosphor-icons/react";
+import { FolderOpenIcon, TrashIcon, WarningIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/cn";
 import { asset } from "@/lib/asset";
 import { Button } from "@/components/primitives/button";
+import { IconButton } from "@/components/primitives/icon-button";
+import { DirectoryRow } from "@/components/features/directory-row";
+
+type LibraryEntry = {
+  id: string;
+  name: string;
+  // Recursive track count for the row's subtitle. Optional — pending
+  // libraries don't have a tree to count from yet.
+  trackCount?: number;
+  // Library-root cover URL, when one was detected during the scan. Falls
+  // back to the folder icon when omitted.
+  coverUrl?: string;
+};
 
 type LandingScreenProps = {
-  // Fired when the user taps the primary CTA. Caller drives the actual
-  // picker (see `useLibraryPicker`); this component is presentational.
-  onPickFolder: () => void;
-  // Disables the CTA while the OS dialog is open so double-tap doesn't
-  // double-fire the picker.
+  // Fired when the user taps the picker CTA. Caller drives the actual
+  // file system picker (see `useLibraryPicker`); this component is
+  // presentational.
+  onAddFolder: () => void;
+  // Disables the picker while the OS dialog is open so double-tap doesn't
+  // double-fire.
   picking?: boolean;
-  // Hides the CTA and surfaces a fallback message when the host browser
+  // Hides the CTAs and surfaces a fallback message when the host browser
   // lacks `showDirectoryPicker` (Safari, iOS, older Chromiums).
   supported?: boolean;
-  // Last failure surface. Cleared on the next `pick()`. Empty / undefined
-  // for the normal "ready" state.
+  // Last failure surface for the picker. Cleared on the next `pick()`.
   error?: string | null;
-  // When set, renders a secondary "Continue with <name>" CTA above the
-  // primary picker — represents a previously-granted handle restored from
-  // IndexedDB whose permission needs a fresh user gesture to re-activate.
-  // The label uses the folder's own name to disambiguate which library is
-  // being resumed.
-  resumeFolderName?: string;
-  onResume?: () => void;
+  // Granted libraries — each renders an "Open <name>" CTA that switches
+  // the active library and routes into /library.
+  libraries?: LibraryEntry[];
+  // Pending libraries — each renders a "Continue with <name>" CTA that
+  // re-requests permission. Permission grants don't survive a reload, so
+  // any library not currently granted lands here.
+  pendingLibraries?: LibraryEntry[];
+  onOpen?: (id: string) => void;
+  onResume?: (id: string) => void;
+  // When provided, each library entry (granted or pending) renders a
+  // trash affordance that drops the entry from storage. The action is
+  // intentionally one-tap with no confirm — re-adding the same folder
+  // is a single picker prompt away.
+  onRemove?: (id: string) => void;
   className?: string;
 };
 
 // First-launch surface — the user lands here, the app explains why it's
-// asking for a folder, and a single CTA opens the OS directory picker.
-// Pure presentational: hook the picker logic in via `useLibraryPicker` at
-// the route level. Designed for portrait (M500) but holds up on a wide
-// container without complaining.
+// asking for a folder, and CTAs open the OS directory picker. When the
+// user already has libraries on file, those re-entry CTAs lead.
 export function LandingScreen({
-  onPickFolder,
+  onAddFolder,
   picking = false,
   supported = true,
   error,
-  resumeFolderName,
+  libraries = [],
+  pendingLibraries = [],
+  onOpen,
   onResume,
+  onRemove,
   className,
 }: LandingScreenProps) {
+  const hasReentry = libraries.length > 0 || pendingLibraries.length > 0;
   return (
     <div
       className={cn(
@@ -67,30 +89,39 @@ export function LandingScreen({
         </div>
 
         {supported ? (
-          <div className="flex flex-col items-center gap-3">
-            {resumeFolderName && onResume ? (
-              <Button variant="primary" size="lg" onClick={onResume}>
-                <ArrowClockwiseIcon weight="bold" />
-                Continue with {resumeFolderName}
-              </Button>
-            ) : null}
+          <div className="flex w-full flex-col items-stretch gap-3">
             <Button
-              // When a resume CTA is showing, downgrade the primary picker
-              // to secondary — the resume action is the more likely intent
-              // for a returning user.
-              variant={resumeFolderName ? "secondary" : "primary"}
+              // Picker downgrades to secondary once any re-entry CTA is
+              // visible — re-entry is the more likely intent for a
+              // returning user.
+              variant={hasReentry ? "secondary" : "primary"}
               size="lg"
-              onClick={onPickFolder}
+              onClick={onAddFolder}
               disabled={picking}
               aria-busy={picking}
             >
               <FolderOpenIcon weight="bold" />
-              {picking
-                ? "Choosing folder…"
-                : resumeFolderName
-                  ? "Choose a different folder"
-                  : "Choose music folder"}
+              {picking ? "Choosing folder…" : "Select folder"}
             </Button>
+            {libraries.map((lib) => (
+              <LibraryRow
+                key={lib.id}
+                name={lib.name}
+                trackCount={lib.trackCount}
+                coverUrl={lib.coverUrl}
+                onActivate={() => onOpen?.(lib.id)}
+                onRemove={onRemove ? () => onRemove(lib.id) : undefined}
+              />
+            ))}
+            {pendingLibraries.map((lib) => (
+              <LibraryRow
+                key={lib.id}
+                name={lib.name}
+                subtitle="Tap to grant access"
+                onActivate={() => onResume?.(lib.id)}
+                onRemove={onRemove ? () => onRemove(lib.id) : undefined}
+              />
+            ))}
           </div>
         ) : (
           <UnsupportedNotice />
@@ -102,6 +133,50 @@ export function LandingScreen({
           </p>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+// One library entry: a directory row (left-aligned, folder icon /
+// cover, name + subtitle) paired with an optional trash affordance. The
+// trash button is a sibling rather than a nested control so we don't end
+// up with two interactive elements stacked inside each other.
+function LibraryRow({
+  name,
+  trackCount,
+  subtitle,
+  coverUrl,
+  onActivate,
+  onRemove,
+}: {
+  name: string;
+  trackCount?: number;
+  subtitle?: string;
+  coverUrl?: string;
+  onActivate: () => void;
+  onRemove?: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <DirectoryRow
+        name={name}
+        trackCount={trackCount}
+        subtitle={subtitle}
+        coverUrl={coverUrl}
+        onClick={onActivate}
+        className="flex-1 min-w-0 rounded-md border border-border"
+      />
+      {onRemove ? (
+        <IconButton
+          variant="ghost"
+          size="lg"
+          aria-label={`Remove ${name}`}
+          onClick={onRemove}
+          className="text-fg-muted hover:text-highlight"
+        >
+          <TrashIcon weight="bold" />
+        </IconButton>
+      ) : null}
     </div>
   );
 }

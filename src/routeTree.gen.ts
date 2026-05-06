@@ -16,6 +16,7 @@ import { Route as ComponentsRouteRouteImport } from './routes/components/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LibraryIndexRouteImport } from './routes/library/index'
 import { Route as ComponentsIndexRouteImport } from './routes/components/index'
+import { Route as LibrarySplatRouteImport } from './routes/library/$'
 
 const ComponentsSlugLazyRouteImport = createFileRoute('/components/$slug')()
 
@@ -51,17 +52,24 @@ const ComponentsSlugLazyRoute = ComponentsSlugLazyRouteImport.update({
 } as any).lazy(() =>
   import('./routes/components/$slug.lazy').then((d) => d.Route),
 )
+const LibrarySplatRoute = LibrarySplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => LibraryRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/components': typeof ComponentsRouteRouteWithChildren
   '/library': typeof LibraryRouteRouteWithChildren
+  '/library/$': typeof LibrarySplatRoute
   '/components/$slug': typeof ComponentsSlugLazyRoute
   '/components/': typeof ComponentsIndexRoute
   '/library/': typeof LibraryIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/library/$': typeof LibrarySplatRoute
   '/components/$slug': typeof ComponentsSlugLazyRoute
   '/components': typeof ComponentsIndexRoute
   '/library': typeof LibraryIndexRoute
@@ -71,6 +79,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/components': typeof ComponentsRouteRouteWithChildren
   '/library': typeof LibraryRouteRouteWithChildren
+  '/library/$': typeof LibrarySplatRoute
   '/components/$slug': typeof ComponentsSlugLazyRoute
   '/components/': typeof ComponentsIndexRoute
   '/library/': typeof LibraryIndexRoute
@@ -81,16 +90,18 @@ export interface FileRouteTypes {
     | '/'
     | '/components'
     | '/library'
+    | '/library/$'
     | '/components/$slug'
     | '/components/'
     | '/library/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/components/$slug' | '/components' | '/library'
+  to: '/' | '/library/$' | '/components/$slug' | '/components' | '/library'
   id:
     | '__root__'
     | '/'
     | '/components'
     | '/library'
+    | '/library/$'
     | '/components/$slug'
     | '/components/'
     | '/library/'
@@ -146,6 +157,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComponentsSlugLazyRouteImport
       parentRoute: typeof ComponentsRouteRoute
     }
+    '/library/$': {
+      id: '/library/$'
+      path: '/$'
+      fullPath: '/library/$'
+      preLoaderRoute: typeof LibrarySplatRouteImport
+      parentRoute: typeof LibraryRouteRoute
+    }
   }
 }
 
@@ -164,10 +182,12 @@ const ComponentsRouteRouteWithChildren = ComponentsRouteRoute._addFileChildren(
 )
 
 interface LibraryRouteRouteChildren {
+  LibrarySplatRoute: typeof LibrarySplatRoute
   LibraryIndexRoute: typeof LibraryIndexRoute
 }
 
 const LibraryRouteRouteChildren: LibraryRouteRouteChildren = {
+  LibrarySplatRoute: LibrarySplatRoute,
   LibraryIndexRoute: LibraryIndexRoute,
 }
 

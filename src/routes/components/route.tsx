@@ -111,7 +111,6 @@ function ComponentsLayout() {
   return (
     <div className="h-dvh flex">
       <aside
-        data-scroll-restoration-id="docs-sidebar"
         className={cn(
           "shrink-0 border-r border-border py-12 flex flex-col gap-1",
           "overflow-y-auto scroll-style transition-[width] duration-200",
@@ -217,7 +216,7 @@ function ComponentsLayout() {
           </Accordion>
         )}
       </aside>
-      <main data-scroll-restoration-id="docs-main" className="flex-1 overflow-y-auto scroll-style">
+      <main className="flex-1 overflow-y-auto scroll-style">
         <div className="px-12 py-12 max-w-[88rem]">
           <Outlet />
         </div>

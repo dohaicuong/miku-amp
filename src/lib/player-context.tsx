@@ -7,17 +7,15 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import type { AudioTrack } from "./library";
+import { clearPlaybackState, savePlaybackState } from "./library-storage";
 
 export type RepeatMode = "off" | "all" | "one";
 
-// How often to re-write the current `t` to the URL while playing. 1 s
+// How often to write the current `t` to IndexedDB while playing. 1 s
 // matches the audio element's own `timeupdate` cadence — a refresh
-// resumes within at most one second of where the user actually was. We
-// replace rather than push, so even sustained writes don't pollute
-// history.
-const PROGRESS_URL_INTERVAL_MS = 1000;
+// resumes within at most one second of where the user actually was.
+const PROGRESS_PERSIST_INTERVAL_MS = 1000;
 
 /*
  * Single-track playback driver. Owns one persistent `HTMLAudioElement` for
@@ -322,49 +320,38 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const expand = useCallback(() => setExpanded(true), []);
   const collapse = useCallback(() => setExpanded(false), []);
 
-  // URL persistence: stash the current track's full path on every track
-  // change so a refresh on `/library?path=...&track=...&t=...` resumes
-  // playback from where it stopped. We avoid touching the URL on the very
-  // first mount (when `current` is still null) so the `?track=` param a
-  // user just landed with isn't wiped before the library route gets a
-  // chance to read it and restore.
-  const navigate = useNavigate();
+  // Persistence: stash the current track's full path in IndexedDB on every
+  // track change so a refresh resumes playback from where it stopped. The
+  // `rootId` rides along so we know which library to find the track in
+  // when multiple are registered. We keep this off the URL because each
+  // navigate({ replace: true }) was bouncing the library scroll position
+  // back to the top.
   const prevTrackRef = useRef<AudioTrack | null>(null);
   useEffect(() => {
     if (current === prevTrackRef.current) return;
     prevTrackRef.current = current;
     if (!current) {
-      void navigate({
-        to: ".",
-        search: (prev) => ({ ...prev, track: undefined, t: undefined }),
-        replace: true,
-      });
+      void clearPlaybackState();
       return;
     }
     const trackPath = [...current.folderPath, current.filename].join("/");
-    void navigate({
-      to: ".",
-      search: (prev) => ({ ...prev, track: trackPath }),
-      replace: true,
-    });
-  }, [current, navigate]);
+    void savePlaybackState({ rootId: current.rootId, trackPath, t: 0 });
+  }, [current]);
 
   // Throttled progress sync: while playing, write `audio.currentTime` to
-  // the URL every few seconds via `replace` so history doesn't fill with
-  // micro-deltas. The interval clears on pause / track change / unmount.
+  // IndexedDB every second. The interval clears on pause / track change /
+  // unmount.
   useEffect(() => {
     if (!current || !playing) return;
     const audio = audioRef.current;
     if (!audio) return;
+    const rootId = current.rootId;
+    const trackPath = [...current.folderPath, current.filename].join("/");
     const id = window.setInterval(() => {
-      void navigate({
-        to: ".",
-        search: (prev) => ({ ...prev, t: Math.floor(audio.currentTime) }),
-        replace: true,
-      });
-    }, PROGRESS_URL_INTERVAL_MS);
+      void savePlaybackState({ rootId, trackPath, t: Math.floor(audio.currentTime) });
+    }, PROGRESS_PERSIST_INTERVAL_MS);
     return () => window.clearInterval(id);
-  }, [current, playing, navigate]);
+  }, [current, playing]);
 
   return (
     <PlayerContext.Provider
