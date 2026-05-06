@@ -5,7 +5,8 @@ import {
   MusicNotesIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useDrag } from "@use-gesture/react";
 import { AlbumCard } from "@/components/features/album-card";
 import { DirectoryRow } from "@/components/features/directory-row";
 import { TrackRow } from "@/components/features/track-row";
@@ -15,6 +16,12 @@ import { usePlayer } from "@/lib/player-context";
 import { loadPlaybackState } from "@/lib/library-storage";
 import { Menu } from "@/components/primitives/menu";
 import { cn } from "@/lib/cn";
+
+// Pixels of horizontal pull past which a release commits the back-
+// swipe. ~80 px is short enough to feel responsive with one thumb but
+// far enough not to fire from incidental horizontal drift while
+// scrolling vertically.
+const SWIPE_BACK_THRESHOLD_PX = 80;
 
 // Shared library viewer. URL drives both which library is active (uuid
 // as the first path segment) and which folder is open (rest of the path).
@@ -60,6 +67,75 @@ export function FoldersView({
     });
   }, [active, root, player]);
 
+  // Swipe-right-to-go-up gesture. The whole page follows the finger
+  // horizontally; on release past the threshold (or with a fast flick)
+  // we slide the page off-screen right and call setPath to walk up one
+  // folder. The new page lands at translateX(0) via the layout effect
+  // below, which clears the inline transform before the next paint —
+  // otherwise the new content would briefly inherit the slide-out
+  // position.
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canSwipeBack = path.length > 0;
+
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.style.transition = "none";
+    el.style.transform = "";
+  }, [path]);
+
+  const bind = useDrag(
+    ({ active: dragActive, last, movement: [mx], swipe: [swipeX], cancel }) => {
+      const el = containerRef.current;
+      if (!el) return;
+      // Block when at root — nothing to walk up to. Reset cleanly so a
+      // partial drag doesn't strand the page mid-translate.
+      if (!canSwipeBack) {
+        cancel();
+        el.style.transition = "transform 200ms ease-out";
+        el.style.transform = "";
+        return;
+      }
+      // Block leftward pulls — back-swipe is right-only. Cancel resets
+      // the gesture so the next start fires fresh.
+      if (mx < 0) {
+        cancel();
+        el.style.transition = "transform 200ms ease-out";
+        el.style.transform = "";
+        return;
+      }
+      if (dragActive) {
+        el.style.transition = "none";
+        el.style.transform = `translateX(${mx}px)`;
+        return;
+      }
+      if (last) {
+        const shouldGoBack = swipeX === 1 || mx > SWIPE_BACK_THRESHOLD_PX;
+        if (shouldGoBack) {
+          // Slide the current page out to the right, then commit the
+          // navigation. The layout effect clears the transform on the
+          // re-render so the new content doesn't inherit it.
+          el.style.transition = "transform 200ms ease-out";
+          el.style.transform = "translateX(100%)";
+          window.setTimeout(() => setPath(path.slice(0, -1)), 200);
+        } else {
+          el.style.transition = "transform 200ms ease-out";
+          el.style.transform = "";
+        }
+      }
+    },
+    {
+      // Touch only — mouse drags would cannibalise row clicks.
+      pointer: { touch: true },
+      // Lock to the horizontal axis so vertical scrolling inside the
+      // folder list still works.
+      axis: "x",
+      // Don't fire a drag-end on a tap-and-release-in-place; otherwise
+      // every row tap would also count as a 0-distance swipe.
+      filterTaps: true,
+    },
+  );
+
   if (!active || !root) return <ScanningState />;
   if (!here) {
     // Stale path no longer resolves (e.g. switched library, or a rescan
@@ -68,7 +144,11 @@ export function FoldersView({
   }
 
   return (
-    <div className="min-h-dvh flex flex-col bg-bg text-fg">
+    <div
+      ref={containerRef}
+      {...bind()}
+      className="min-h-dvh flex flex-col bg-bg text-fg touch-pan-y"
+    >
       <header className="shrink-0 border-b border-border px-5 py-5 flex items-center gap-3">
         {path.length > 0 ? (
           <button
